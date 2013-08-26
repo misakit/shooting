@@ -1,4 +1,3 @@
-super_depth
-===========
+# super_depth
 
-SuperDepth with enchant.js
+SuperDepth implemented with enchant.js
