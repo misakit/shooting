@@ -1,23 +1,17 @@
 enchant();
 
 // 移動速度
-var SPEED = 2;
-var rand = function(n){
-  return Math.floor(Math.random() * n) + 1;
-};
+var SPEED = 1;
+var shot_count = 4;
 
 window.onload = function() {
-  game = new Game(320, 200);
+  game = new Game(320, 320);
   game.fps = 24;
-  game.preload('map0.png');
-  game.preload('graphic.png');
-  game.preload('effect0.gif');
+  game.preload('map0.png', 'graphic.png', 'effect0.gif', 'pad.png');
 
   game.score = 0;
-  game.touched = false;
 
   game.onload = function() {
-    //game.rootScene.backgroundColor = 'black';
     map = new Map(16, 16);
     map.image = game.assets['map0.png'];
     map.loadData(
@@ -37,24 +31,37 @@ window.onload = function() {
     game.rootScene.addChild(map);
 
     player = new Player(140, 10);
-    enemies = new Array();
 
-    /**
-     * Executed every other frame
-     * フレームごとに実行する
-     */
+    pad = new Pad();
+    pad.moveTo(0,200);
+    game.rootScene.addChild(pad);
+
+    enemies = new Array();
+    itemenemies = new Array();
+
+    scoreLabel = new ScoreLabel(8, 170);
+    game.rootScene.addChild(scoreLabel);
+
+    // Executed every other frame
     game.rootScene.addEventListener("enterframe", function(e){
-      if(rand(1000) < game.frame / 20 * Math.sin(game.frame / 100) + game.frame / 20 + 50) {
+      if (rand(100) < 5 && game.frame % 3 == 0) {
         var y = rand(140);
-        var omega = y < 160 ? 0.01 : -0.01;
-        var enemy = new Enemy(320, y, omega);
+        var enemy = new Enemy(320, y, 0.1);
         enemy.key = game.frame;
         enemies[game.frame] = enemy;
+        console.log("this is enemy.");
+      } else if (rand(100) < 5 && game.frame % 7 == 0) {
+        var y = rand(100);
+        while (y < 30) {
+          y = rand(100);
+        }
+        var itemenemy = new ItemEnemy(320, y, 0.1);
+        itemenemy.key = game.frame;
+        itemenemies[game.frame] = itemenemy;
       }
       scoreLabel.score = game.score;
     });
-    scoreLabel = new ScoreLabel(8, 170);
-    game.rootScene.addChild(scoreLabel);
+
   };
   game.start();
 };
@@ -72,48 +79,21 @@ var Player = enchant.Class.create(enchant.Sprite, {
     this.x = x;
     this.y = y;
     this.frame = 0;
-    /*
-    game.rootScene.addEventListener('touchstart', function (e) {
-      player.y = e.y;
-      game.touched = true;
-    });
-    game.rootScene.addEventListener('touchmove', function (e) {
-      player.y = e.y;
-    });
-    game.rootScene.addEventListener('touchend', function (e) {
-      player.y = e.y;
-      game.touched = false;
-    });
-    */
 
     this.onenterframe = function() {
       var input = game.input;
       if (input.left)  { this.x -= SPEED; }
       if (input.right) { this.x += SPEED; }
-      if (input.down)  { if (game.frame % 3 == 0) {
-        var s = new PlayerShoot(this.x, this.y);
-      } }
-    };
-    game.rootScene.addChild(this);
-
-    /*
-    this.addEventListener('enterframe', function () {
-      if (game.input.down && game.frame % 3 == 0) {
-        var s = new PlayerShoot(this.x, this.y);
+      if (input.down)  {
+        if (game.frame % 3 == 0 && shot_count > 0) {
+          var s = new PlayerShoot(this.x, this.y);
+          shot_count--;
+          console.log(shot_count);
+        }
       }
-      this.move();
-    });
+    };
+
     game.rootScene.addChild(this);
-  },
-  move: function () {
-    if (game.input.left) {
-      var vx = Math.cos(Math.PI) * SPEED;
-      this.x = this.x + vx;
-    } else if (game.input.right) {
-      var vx = Math.cos(Math.PI) * SPEED;
-      this.x = this.x - vx;
-    }
-     */
   }
 });
 
@@ -123,6 +103,7 @@ var Player = enchant.Class.create(enchant.Sprite, {
  * Spriteクラスを継承して、弾クラスを生成する。
  * 直接は使わず、PlayerShoot、EnemyShootから継承して利用する
  */
+ 
 var Shoot = enchant.Class.create(enchant.Sprite, {
   initialize: function (x, y, direction) {
     enchant.Sprite.call(this, 16, 16);
@@ -131,13 +112,20 @@ var Shoot = enchant.Class.create(enchant.Sprite, {
     this.y = y;
     this.direction = direction;
     this.moveSpeed = 2;
+
     this.addEventListener('enterframe', function () {
       this.x += this.moveSpeed * Math.cos(this.direction);
       this.y += this.moveSpeed * Math.sin(this.direction);
-      if(this.y > 160 || this.x > 320 || this.x < -this.width || this.y < -this.height) {
+      //if(this.y > 160 || this.x > 320 || this.x < -this.width || this.y < -this.height) {
+      if(this.x < -this.width || this.y < -this.height) {
         this.remove();
+      } else if (this.y > 140 || this.x > 320 ) {
+        this.remove();
+        shot_count++;
+        console.log(shot_count);
       }
     });
+
     game.rootScene.addChild(this);
   },
   remove: function () {
@@ -150,6 +138,7 @@ var Shoot = enchant.Class.create(enchant.Sprite, {
  * PlayerShoot (self shooting) class. Created and succeeds Shoot class.
  * PlayerShoot (自弾) クラス。Shootクラスを継承して作成する。
  */
+
 var PlayerShoot = enchant.Class.create(Shoot, {
   initialize: function (x, y) {
     Shoot.call(this, x, y, Math.PI/2);
@@ -160,6 +149,18 @@ var PlayerShoot = enchant.Class.create(Shoot, {
           this.remove();
           enemies[i].remove();
           game.score += 100;
+          shot_count++;
+          console.log(shot_count);
+        }
+      }
+      for (var i in itemenemies) {
+        if(itemenemies[i].intersect(this)) {
+          this.remove();
+          itemenemies[i].remove();
+          var item = new ItemShoot(this.x, this.y);
+          game.score += 10;
+          shot_count++;
+          console.log(shot_count);
         }
       }
     });
@@ -184,22 +185,8 @@ var Enemy = enchant.Class.create(enchant.Sprite, {
     this.image = game.assets['graphic.png'];
     this.x = x;
     this.y = y;
-
-    /**
-     * Display enemy image.
-     * You divide the graphic.png image into 16x16 lattices,
-     * and start counting from 0 at the top left, and because the image you want to display is at 3, you set frame to 3.
-     * 敵機の画像を表示する。
-     * graphic.png の画像を 16x16 の格子で区切ると、
-     * 左上を0番目として数えて、表示したい画像は3番目にあるため、frameには3を指定する。
-     */
     this.frame = 3;
-    /**
-     * Sets rotation angle.
-     * Here rotation angle (for circles, this is 360°) is used.
-     * 角速度を指定する。
-     * ここでは度数法 (円周を360°とする) を用いる。
-     */
+
     this.omega = omega;
 
     /**
@@ -211,6 +198,7 @@ var Enemy = enchant.Class.create(enchant.Sprite, {
     this.direction = 0;
     this.moveSpeed = 3;
 
+    //this.tl.moveBy(-30, 30, 30).moveBy(-30, -30, 30).loop();
     /**
      * ets processing executed each time enemy object is drawn.
      * One frame moves, and if drawn within the parameters of the image this.remove(); is used and image is removed from drawing tree.
@@ -220,9 +208,9 @@ var Enemy = enchant.Class.create(enchant.Sprite, {
     this.addEventListener('enterframe', function () {
       this.move();
 
-      if(this.y > 160 || this.y < 30 || this.x > 320 || this.x < -this.width || this.y < -this.height) {
+      if(this.y > 140 || this.y < 30 || this.x > 320 || this.x < -this.width || this.y < -this.height) {
         this.remove();
-      } else if(this.age % 30 == 0) {
+      } else if(rand(100) < 5) {
         var s = new EnemyShoot(this.x, this.y);
       }
     });
@@ -249,19 +237,38 @@ var Enemy = enchant.Class.create(enchant.Sprite, {
      */
     this.direction += this.omega;
     this.x -= this.moveSpeed * Math.cos(this.direction / 180 * Math.PI);
-    this.y += this.moveSpeed * Math.sin(this.direction / 180 * Math.PI)
+    this.y += this.moveSpeed * Math.sin(this.direction / 180 * Math.PI);
   },
   remove: function () {
-    /**
-     * Deletes enemy object (body) from drawing tree.
-     * By this processing, the enemy object
-     * will no longer be displayed anywhere, withdrawing it via GC.
-     * 描画ツリーから敵機のオブジェクト(自身)を取り除く。
-     * この処理により敵機オブジェクトは
-     * どこからも参照されなくなるので、GCによって回収される。
-     */
     game.rootScene.removeChild(this);
     delete enemies[this.key];
+  }
+});
+
+var ItemEnemy = enchant.Class.create(enchant.Sprite, {
+  initialize: function (x, y) {
+    enchant.Sprite.call(this, 16, 16);
+    this.image = game.assets['graphic.png'];
+    this.x = x;
+    this.y = y;
+    this.frame = 4;
+
+    this.direction = 0;
+    this.moveSpeed = 2;
+
+    this.tl.moveBy(-30, 30, 30).moveBy(-30, -30, 30).loop();
+
+    this.addEventListener('enterframe', function () {
+      if(this.y > 140 || this.y < 30 || this.x > 320 || this.x < -this.width || this.y < -this.height) {
+        this.remove();
+      }
+    });
+    game.rootScene.addChild(this);
+  },
+
+  remove: function () {
+    game.rootScene.removeChild(this);
+    delete itemenemies[this.key];
   }
 });
 
@@ -279,5 +286,22 @@ var EnemyShoot = enchant.Class.create(Shoot, {
         game.end(game.score, "SCORE: " + game.score)
       }
     });
+  }
+});
+var ItemShoot = enchant.Class.create(Shoot, {
+  initialize: function (x, y) {
+    Shoot.call(this, x, y, (Math.PI/2)*3);
+    this.frame = 9;
+    this.addEventListener('enterframe', function () {
+      if(player.within(this, 8)) {
+        this.remove();
+        SPEED += 0.5;
+        console.log("SPEED = " + SPEED);
+      }
+    });
+  },
+  remove: function () {
+    game.rootScene.removeChild(this);
+    //delete enemies[this.key];
   }
 });
