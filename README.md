@@ -1,5 +1,4 @@
 # super_depth
-
 SuperDepth implemented with enchant.js
 
 ## Done List
@@ -9,8 +8,12 @@ SuperDepth implemented with enchant.js
 * 敵作成
 * 敵がランダムで右から左に流れてくる
 * 弾が撃てる
+  * 弾数制限をつける
 * 当たり判定
+* じぐざぐに動く敵を作る
+* アイテムを落とす敵を作る
+* ドロップアイテムを拾うと、自機の移動速度が上がる
 
 ## TODO List
 * 敵を左右両方から流れるようにする
-* じぐざぐに動く敵を作る
+* ドロップしたアイテムを一定時間で消えるようにする
