@@ -11,6 +11,9 @@ window.onload = function() {
 
   game.score = 0;
 
+  game.keybind(90, 'z'); //zキー
+  game.keybind(88, 'x'); //xキー
+
   game.onload = function() {
     map = new Map(16, 16);
     map.image = game.assets['map0.png'];
@@ -32,8 +35,38 @@ window.onload = function() {
 
     player = new Player(140, 10);
 
+    var sprite  = new Sprite(100, 100);	// スプライト生成
+    var surface = new Surface(100, 100);	// サーフェス生成
+
+    // canvas 描画
+    // 円塗りつぶし描画
+    surface.context.beginPath();
+    surface.context.arc(50, 50, 45, 0, Math.PI*2, false);
+    surface.context.fillStyle = "white";
+    surface.context.fill();
+
+    // 円ストローク描画
+    surface.context.beginPath();
+    surface.context.arc(50, 50, 45, 0, Math.PI*2, false);
+    surface.context.strokeStyle = "gray";
+    surface.context.lineWidth = 2;
+    surface.context.stroke();
+
+    sprite.image = surface;	// サーフェスを画像としてセット
+    sprite.moveTo(200, 200);
+    game.rootScene.addChild(sprite);
+
+    sprite.ontouchstart = function() {
+      //alert(1);
+      if (shot_count > 0) {
+        var s = new PlayerShoot(player.x, player.y);
+        shot_count--;
+        console.log(shot_count);
+      }
+    };
+
     pad = new Pad();
-    pad.moveTo(0,200);
+    pad.moveTo(10,200);
     game.rootScene.addChild(pad);
 
     enemies = new Array();
@@ -84,6 +117,14 @@ var Player = enchant.Class.create(enchant.Sprite, {
       var input = game.input;
       if (input.left)  { this.x -= SPEED; }
       if (input.right) { this.x += SPEED; }
+      if (input.z || input.x)  {
+        if (game.frame % 3 == 0 && shot_count > 0) {
+          var s = new PlayerShoot(this.x, this.y);
+          shot_count--;
+          console.log(shot_count);
+        }
+      }
+      /*
       if (input.down)  {
         if (game.frame % 3 == 0 && shot_count > 0) {
           var s = new PlayerShoot(this.x, this.y);
@@ -91,6 +132,7 @@ var Player = enchant.Class.create(enchant.Sprite, {
           console.log(shot_count);
         }
       }
+      */
     };
 
     game.rootScene.addChild(this);
