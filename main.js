@@ -7,12 +7,12 @@ var shot_count = 4;
 window.onload = function() {
   game = new Game(320, 320);
   game.fps = 24;
-  game.preload('map0.png', 'graphic.png', 'effect0.gif', 'pad.png');
+  game.preload('map0.png', 'graphic.png', 'icon0.png', 'effect0.gif', 'pad.png');
 
   game.score = 0;
 
-  game.keybind(90, 'z'); //zキー
-  game.keybind(88, 'x'); //xキー
+  game.keybind(90, 'z');
+  game.keybind(88, 'x');
 
   game.onload = function() {
     map = new Map(16, 16);
@@ -20,15 +20,15 @@ window.onload = function() {
     map.loadData(
       [
         [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9],
+        [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9]
       ]
     );
     game.rootScene.addChild(map);
@@ -66,23 +66,27 @@ window.onload = function() {
     };
 
     pad = new Pad();
-    pad.moveTo(10,200);
+    pad.moveTo(20,200);
+    pad.scaleX = 1.5;
+    pad.scaleY = 1.5;
     game.rootScene.addChild(pad);
 
     enemies = new Array();
     itemenemies = new Array();
 
-    scoreLabel = new ScoreLabel(8, 170);
+    scoreLabel = new ScoreLabel(8, 165);
     game.rootScene.addChild(scoreLabel);
 
     // Executed every other frame
     game.rootScene.addEventListener("enterframe", function(e){
       if (rand(100) < 5 && game.frame % 3 == 0) {
-        var y = rand(140);
+        var y = rand(130);
+        while (y < 30) {
+          y = rand(130);
+        }
         var enemy = new Enemy(320, y, 0.1);
         enemy.key = game.frame;
         enemies[game.frame] = enemy;
-        console.log("this is enemy.");
       } else if (rand(100) < 5 && game.frame % 7 == 0) {
         var y = rand(100);
         while (y < 30) {
@@ -94,7 +98,6 @@ window.onload = function() {
       }
       scoreLabel.score = game.score;
     });
-
   };
   game.start();
 };
@@ -115,8 +118,16 @@ var Player = enchant.Class.create(enchant.Sprite, {
 
     this.onenterframe = function() {
       var input = game.input;
-      if (input.left)  { this.x -= SPEED; }
-      if (input.right) { this.x += SPEED; }
+      if (input.left)  {
+        this.scaleX = - 1; // 左右を反転させる
+        this.scaleY = 1;
+        this.x -= SPEED;
+      }
+      if (input.right) {
+        this.scaleX = 1; // 左右を反転させる
+        this.scaleY = 1;
+        this.x += SPEED;
+      }
       if (input.z || input.x)  {
         if (game.frame % 3 == 0 && shot_count > 0) {
           var s = new PlayerShoot(this.x, this.y);
@@ -124,15 +135,6 @@ var Player = enchant.Class.create(enchant.Sprite, {
           console.log(shot_count);
         }
       }
-      /*
-      if (input.down)  {
-        if (game.frame % 3 == 0 && shot_count > 0) {
-          var s = new PlayerShoot(this.x, this.y);
-          shot_count--;
-          console.log(shot_count);
-        }
-      }
-      */
     };
 
     game.rootScene.addChild(this);
@@ -333,12 +335,19 @@ var EnemyShoot = enchant.Class.create(Shoot, {
 var ItemShoot = enchant.Class.create(Shoot, {
   initialize: function (x, y) {
     Shoot.call(this, x, y, (Math.PI/2)*3);
-    this.frame = 9;
+    this.image = game.assets['icon0.png'];
+    this.frame = 65;
+    this.moveSpeed = 1;
     this.addEventListener('enterframe', function () {
-      if(player.within(this, 8)) {
+      if(player.within(this, 6)) {
         this.remove();
         SPEED += 0.5;
         console.log("SPEED = " + SPEED);
+      }
+      if (this.y == 10) {
+        this.moveSpeed = 0;
+        this.tl.delay(60);
+        this.tl.fadeOut(30);
       }
     });
   },
