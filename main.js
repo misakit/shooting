@@ -69,7 +69,7 @@ window.onload = function() {
     };
 
     pad = new Pad();
-    pad.moveTo(20,200);
+    pad.moveTo(30,200);
     pad.scaleX = 1.5;
     pad.scaleY = 1.5;
     game.rootScene.addChild(pad);
@@ -203,19 +203,21 @@ var PlayerShoot = enchant.Class.create(Shoot, {
       for (var i in enemies) {
         //if(enemies[i].intersect(this)) {
         if(enemies[i].within(this, 10)) {
+          var burst = new Burst(enemies[i].x, enemies[i].y);
           this.remove();
           enemies[i].remove();
+          burst.animation();
           game.score += 100;
           shot_count++;
-          console.log(shot_count);
         }
       }
       for (var i in itemenemies) {
-        //if(itemenemies[i].intersect(this)) {
         if(itemenemies[i].within(this, 10)) {
+          var burst = new Burst(itemenemies[i].x, itemenemies[i].y);
           this.remove();
           itemenemies[i].remove();
-          var item = new ItemShoot(this.x, this.y);
+          burst.animation();
+          var item = new ItemDrop(this.x, this.y);
           game.score += 10;
           shot_count++;
           console.log(shot_count);
@@ -336,17 +338,15 @@ var EnemyShoot = enchant.Class.create(Shoot, {
     this.frame = 13;
     this.addEventListener('enterframe', function () {
       if(player.within(this, 8)) {
-        var bomb = new Sprite(16, 16);
-        bomb.image = game.assets['effect0.gif'];
-        game.rootScene.addChild(bomb);
-        bomb.frame = 0;
-        bomb.moveTo(player.x, player.y);
-        game.end(game.score, "SCORE: " + game.score)
+        var burst = new Burst(player.x, player.y);
+        game.rootScene.removeChild(player);
+        burst.end();
       }
     });
   }
 });
-var ItemShoot = enchant.Class.create(Shoot, {
+
+var ItemDrop = enchant.Class.create(Shoot, {
   initialize: function (x, y) {
     Shoot.call(this, x, y, (Math.PI/2)*3);
     this.image = game.assets['icon0.png'];
@@ -378,6 +378,34 @@ var ItemShoot = enchant.Class.create(Shoot, {
   },
   remove: function () {
     game.rootScene.removeChild(this);
-    //delete enemies[this.key];
+  }
+});
+
+var Burst = enchant.Class.create(enchant.Sprite, {
+  initialize: function(x, y, remove) {
+    enchant.Sprite.call(this, 16, 16);
+    this.x = x;
+    this.y = y;
+    this.image = game.assets['effect0.gif'];
+    this.frame = 0;
+    game.rootScene.addChild(this);
+  },
+  animation: function() {
+    this.tl.cue({
+      0:function(){this.frame++;},
+      5:function(){this.frame++;},
+      10:function(){this.frame++;},
+      15:function(){this.frame++;},
+      20: function(){game.rootScene.removeChild(this)}
+    });
+  },
+  end: function() {
+    this.tl.cue({
+      0:function(){this.frame++;},
+      5:function(){this.frame++;},
+      10:function(){this.frame++;},
+      15:function(){this.frame++;},
+      25:function(){game.end(game.score, "SCORE: " + game.score);}
+    });
   }
 });
