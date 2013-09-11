@@ -1,10 +1,9 @@
 enchant();
 
-// 移動速度
 var SPEED = 1;
-var shot_count = 4;
-var MOVE_RANGE_X = 0;
-var MOVE_RANGE_Y = 0;
+var SHOOT_MAX = 4;
+var ENEMY_COUNTER = 0;
+var ITEM_ENEMY_COUNTER = 0;
 
 window.onload = function() {
   game = new Game(320, 320);
@@ -35,7 +34,6 @@ window.onload = function() {
     );
     game.rootScene.addChild(map);
 
-
     player = new Player(140, 10);
 
     var sprite  = new Sprite(100, 100);	// スプライト生成
@@ -61,10 +59,10 @@ window.onload = function() {
 
     sprite.ontouchstart = function() {
       //alert(1);
-      if (shot_count > 0) {
+      if (SHOOT_MAX > 0) {
         var s = new PlayerShoot(player.x, player.y);
-        shot_count--;
-        console.log(shot_count);
+        SHOOT_MAX--;
+        console.log(SHOOT_MAX);
       }
     };
 
@@ -82,6 +80,107 @@ window.onload = function() {
 
     // Executed every other frame
     game.rootScene.addEventListener("enterframe", function(e){
+      // enemy 出現率
+      if (rand(10) < 5) {
+        var x = 0;
+      } else {
+        var x = 320;
+      }
+      switch (ENEMY_COUNTER) {
+        case 0:
+          if (rand(10) < 8 && game.frame % 7 == 0) {
+            var y = rand(120);
+            while (y < 30) {
+              y = rand(120);
+            }
+            var enemy = new Enemy(x, y, 0);
+            enemy.key = game.frame;
+            enemies[game.frame] = enemy;
+            ENEMY_COUNTER++;
+          }
+          break;
+        case 1:
+          if (rand(10) < 8 && game.frame % 7 == 0) {
+            var y = rand(120);
+            while (y < 30) {
+              y = rand(120);
+            }
+            var enemy = new Enemy(x, y, 0);
+            enemy.key = game.frame;
+            enemies[game.frame] = enemy;
+            ENEMY_COUNTER++;
+          }
+          break;
+        case 2:
+          if (rand(10) < 5 && game.frame % 7 == 0) {
+            var y = rand(120);
+            while (y < 30) {
+              y = rand(120);
+            }
+            var enemy = new Enemy(x, y, 0);
+            enemy.key = game.frame;
+            enemies[game.frame] = enemy;
+            ENEMY_COUNTER++;
+          }
+          break;
+        case 3:
+          if (rand(10) < 5 && game.frame % 7 == 0) {
+            var y = rand(120);
+            while (y < 30) {
+              y = rand(120);
+            }
+            var enemy = new Enemy(x, y, 0);
+            enemy.key = game.frame;
+            enemies[game.frame] = enemy;
+            ENEMY_COUNTER++;
+          }
+          break;
+        case 4:
+          if (rand(10) < 2 && game.frame % 7 == 0) {
+            var y = rand(120);
+            while (y < 30) {
+              y = rand(120);
+            }
+            var enemy = new Enemy(x, y, 0);
+            enemy.key = game.frame;
+            enemies[game.frame] = enemy;
+            ENEMY_COUNTER++;
+          }
+          break;
+        default:
+          console.log("ENEMY_COUNTER = " + ENEMY_COUNTER);
+          break;
+      }
+      switch (ITEM_ENEMY_COUNTER) {
+        case 0:
+          if (rand(10) < 1 && game.frame % 10 == 0) {
+            var y = rand(120);
+            while (y < 30) {
+              y = rand(120);
+            }
+            var itemenemy = new ItemEnemy(x, y, 0);
+            itemenemy.key = game.frame;
+            itemenemies[game.frame] = itemenemy;
+            ITEM_ENEMY_COUNTER++;
+          }
+          break;
+        case 1:
+          if (rand(10) < 1 && game.frame % 10 == 0) {
+            var y = rand(120);
+            while (y < 30) {
+              y = rand(120);
+            }
+            var itemenemy = new ItemEnemy(x, y, 0);
+            itemenemy.key = game.frame;
+            itemenemies[game.frame] = itemenemy;
+            ITEM_ENEMY_COUNTER++;
+          }
+          break;
+        default :
+          console.log("ITEM_ENEMY_COUNTER = " + ITEM_ENEMY_COUNTER)
+          break;
+      }
+      /*
       if (rand(100) < 5 && game.frame % 3 == 0) {
         var y = rand(120);
         while (y < 30) {
@@ -99,6 +198,7 @@ window.onload = function() {
         itemenemy.key = game.frame;
         itemenemies[game.frame] = itemenemy;
       }
+      */
       scoreLabel.score = game.score;
     });
   };
@@ -119,7 +219,6 @@ var Player = enchant.Class.create(enchant.Sprite, {
     this.y = y;
     this.frame = 0;
     this.MOVE_RANGE_X = game.width - this.width;
-    this.MOVE_RANGE_Y = game.height - this.height;
 
     this.onenterframe = function() {
       var input = game.input;
@@ -141,10 +240,10 @@ var Player = enchant.Class.create(enchant.Sprite, {
           this.x += SPEED;
         }      }
       if (input.z || input.x)  {
-        if (game.frame % 3 == 0 && shot_count > 0) {
+        if (game.frame % 3 == 0 && SHOOT_MAX > 0) {
           var s = new PlayerShoot(this.x, this.y);
-          shot_count--;
-          console.log(shot_count);
+          SHOOT_MAX--;
+          console.log(SHOOT_MAX);
         }
       }
     };
@@ -177,8 +276,8 @@ var Shoot = enchant.Class.create(enchant.Sprite, {
         this.remove();
       } else if (this.y > 140 || this.x > 320 ) {
         this.remove();
-        shot_count++;
-        console.log(shot_count);
+        SHOOT_MAX++;
+        console.log(SHOOT_MAX);
       }
     });
 
@@ -208,7 +307,7 @@ var PlayerShoot = enchant.Class.create(Shoot, {
           enemies[i].remove();
           burst.animation();
           game.score += 100;
-          shot_count++;
+          SHOOT_MAX++;
         }
       }
       for (var i in itemenemies) {
@@ -217,10 +316,16 @@ var PlayerShoot = enchant.Class.create(Shoot, {
           this.remove();
           itemenemies[i].remove();
           burst.animation();
-          var item = new ItemDrop(this.x, this.y);
+          if (rand(100) > 70) {
+            var speedUpItem = new SpeedUpItem(this.x, this.y);
+          } else if (rand(100) < 30) {
+            var speedDownItem = new SpeedDownItem(this.x, this.y);
+          } else {
+            var shootMaxUpItem = new ShootMaxUpItem(this.x, this.y);
+          }
           game.score += 10;
-          shot_count++;
-          console.log(shot_count);
+          SHOOT_MAX++;
+          console.log(SHOOT_MAX);
         }
       }
     });
@@ -246,6 +351,7 @@ var Enemy = enchant.Class.create(enchant.Sprite, {
     this.x = x;
     this.y = y;
     this.frame = 3;
+    if (x == 0) {this.goRightFlag = true;}
 
     this.omega = omega;
 
@@ -270,7 +376,7 @@ var Enemy = enchant.Class.create(enchant.Sprite, {
 
       if(this.y > 140 || this.y < 30 || this.x > 320 || this.x < -this.width || this.y < -this.height) {
         this.remove();
-      } else if(rand(100) < 5) {
+      } else if(rand(100) < 2) {
         var s = new EnemyShoot(this.x, this.y);
       }
     });
@@ -296,12 +402,17 @@ var Enemy = enchant.Class.create(enchant.Sprite, {
      * 初期設定ではゆるやかな回転運動となる。
      */
     this.direction += this.omega;
-    this.x -= this.moveSpeed * Math.cos(this.direction / 180 * Math.PI);
+    if (this.goRightFlag == true) {
+      this.x += this.moveSpeed * Math.cos(this.direction / 180 * Math.PI);
+    } else {
+      this.x -= this.moveSpeed * Math.cos(this.direction / 180 * Math.PI);
+    }
     this.y += this.moveSpeed * Math.sin(this.direction / 180 * Math.PI);
   },
   remove: function () {
     game.rootScene.removeChild(this);
     delete enemies[this.key];
+    ENEMY_COUNTER--;
   }
 });
 
@@ -312,11 +423,16 @@ var ItemEnemy = enchant.Class.create(enchant.Sprite, {
     this.x = x;
     this.y = y;
     this.frame = 4;
+    if (x == 0) {this.goRightFlag = true;}
 
     this.direction = 0;
     this.moveSpeed = 2;
 
-    this.tl.moveBy(-30, 30, 30).moveBy(-30, -30, 30).loop();
+    if (this.goRightFlag == true) {
+      this.tl.moveBy(30, 30, 30).moveBy(30, -30, 30).loop();
+    } else {
+      this.tl.moveBy(-30, 30, 30).moveBy(-30, -30, 30).loop();
+    }
 
     this.addEventListener('enterframe', function () {
       if(this.y > 140 || this.y < 30 || this.x > 320 || this.x < -this.width || this.y < -this.height) {
@@ -329,14 +445,19 @@ var ItemEnemy = enchant.Class.create(enchant.Sprite, {
   remove: function () {
     game.rootScene.removeChild(this);
     delete itemenemies[this.key];
+    ITEM_ENEMY_COUNTER--;
   }
 });
 
 var EnemyShoot = enchant.Class.create(Shoot, {
   initialize: function (x, y) {
     Shoot.call(this, x, y, (Math.PI/2)*3);
+    //this.direction = Math.PI + Math.atan2((this.y - player.y), (this.x - player.x));
     this.frame = 13;
     this.addEventListener('enterframe', function () {
+      //console.log("Shoot x = " + this.x + "; Shoot y = " + this.y);
+      //console.log("Player x = " + player.x + "; Player y = " + player.y);
+      //console.log("rad = " + Math.atan2((this.y - player.y), (this.x - player.x)));
       if(player.within(this, 8)) {
         var burst = new Burst(player.x, player.y);
         game.rootScene.removeChild(player);
@@ -346,7 +467,7 @@ var EnemyShoot = enchant.Class.create(Shoot, {
   }
 });
 
-var ItemDrop = enchant.Class.create(Shoot, {
+var SpeedUpItem = enchant.Class.create(Shoot, {
   initialize: function (x, y) {
     Shoot.call(this, x, y, (Math.PI/2)*3);
     this.image = game.assets['icon0.png'];
@@ -361,11 +482,87 @@ var ItemDrop = enchant.Class.create(Shoot, {
         msg.x = 130;
         msg.y = 140;
         game.rootScene.addChild(msg);
-        msg.tl.fadeOut(20).then(function () {
+        msg.tl.fadeOut(30).then(function () {
           game.rootScene.removeChild(msg);
         });
         SPEED += 0.5;
         console.log("SPEED = " + SPEED);
+      }
+      if (this.y == 10) {
+        var me = this;
+        this.moveSpeed = 0;
+        this.tl.delay(60).fadeOut(30).then(function () {
+          me.remove();
+        });
+      }
+    });
+  },
+  remove: function () {
+    game.rootScene.removeChild(this);
+  }
+});
+
+var SpeedDownItem = enchant.Class.create(Shoot, {
+  initialize: function (x, y) {
+    Shoot.call(this, x, y, (Math.PI/2)*3);
+    this.image = game.assets['icon0.png'];
+    this.frame = 66;
+    this.moveSpeed = 1;
+
+    this.addEventListener('enterframe', function () {
+      if(player.within(this, 6)) {
+        this.remove();
+        msg = new Label("SPEED DOWN!");
+        msg.color = "white";
+        msg.x = 130;
+        msg.y = 140;
+        game.rootScene.addChild(msg);
+        msg.tl.fadeOut(30).then(function () {
+          game.rootScene.removeChild(msg);
+        });
+        if (SPEED > 0.5) {
+          SPEED -= 0.5;
+          console.log(SPEED);
+        } else {
+          console.log(SPEED);
+        }
+        console.log("SPEED = " + SPEED);
+      }
+      if (this.y == 10) {
+        var me = this;
+        this.moveSpeed = 0;
+        this.tl.delay(60).fadeOut(30).then(function () {
+          me.remove();
+        });
+      }
+    });
+  },
+  remove: function () {
+    game.rootScene.removeChild(this);
+  }
+});
+
+var ShootMaxUpItem = enchant.Class.create(Shoot, {
+  initialize: function (x, y) {
+    Shoot.call(this, x, y, (Math.PI/2)*3);
+    this.image = game.assets['icon0.png'];
+    this.frame = 12;
+    this.moveSpeed = 1;
+
+    this.addEventListener('enterframe', function () {
+      if(player.within(this, 6)) {
+        this.remove();
+        msg = new Label("SHOOT MAX UP!");
+        msg.color = "white";
+        msg.x = 130;
+        msg.y = 140;
+        game.rootScene.addChild(msg);
+        msg.tl.fadeOut(30).then(function () {
+          game.rootScene.removeChild(msg);
+        });
+        if (SHOOT_MAX < 10) {
+          SHOOT_MAX += 1;
+        }
       }
       if (this.y == 10) {
         var me = this;
@@ -396,7 +593,7 @@ var Burst = enchant.Class.create(enchant.Sprite, {
       5:function(){this.frame++;},
       10:function(){this.frame++;},
       15:function(){this.frame++;},
-      20: function(){game.rootScene.removeChild(this)}
+      18: function(){game.rootScene.removeChild(this)}
     });
   },
   end: function() {
@@ -405,7 +602,10 @@ var Burst = enchant.Class.create(enchant.Sprite, {
       5:function(){this.frame++;},
       10:function(){this.frame++;},
       15:function(){this.frame++;},
-      25:function(){game.end(game.score, "SCORE: " + game.score);}
+      25:function(){
+        scoreLabel.y = 250;
+        game.end(game.score, "SCORE: " + game.score);
+      }
     });
   }
 });
