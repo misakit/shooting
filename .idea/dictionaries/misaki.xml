@@ -2,7 +2,9 @@
   <dictionary name="misaki">
     <words>
       <w>enterframe</w>
+      <w>onenterframe</w>
       <w>onload</w>
+      <w>ontouchstart</w>
     </words>
   </dictionary>
 </component>
